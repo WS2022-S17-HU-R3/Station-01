@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/bootstrap.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/accomodations.css">
+    <title>accomodations</title>
+</head>
+<body class="w-100 h-100">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto d-flex justify-content-around">
+            <li class="nav-item active">
+              <a class="nav-link" href="accomodations.html">accomodations</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="bookings.html">bookings</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" onclick="logout();">Logout</a>
+            </li>
+        </div>
+      </nav>
+
+<div id="container" class="w-100 h-100 d-flex justify-content-between  flex-wrap">
+
+  
+
+
+</div>
+
+
+</body>
+<script src="jquery/jquery-3.6.0.min.js"></script>
+<script src="js/bootstrap.js"></script>
+<script>
+
+function isAuth(){
+    if(localStorage.getItem('logged') != '1'){
+        location.replace("http://localhost/login.html")
+    }
+}
+function logout(){
+    localStorage.setItem('logged','0');
+    isAuth();
+}
+
+isAuth();
+
+fetch('http://localhost/api/accomodations')
+  .then(response => response.json())
+  .then((data) => {
+    data.forEach(element => {
+      console.log(element);
+      container.innerHTML += `<div class="card" style="width: 18rem;">
+    <img src="../img/${element["img"]}" class="card-img-top img-thumbnail" alt="Kep">
+    <div class="card-body">
+      <h3 class="card-title text-center">${element["name"]}</h3>
+      <p class="card-text">
+        <div class="input-group flex-nowrap">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="addon-wrapping">price</span>
+      </div>
+      <input type="text" class="form-control" readonly value="${element["price"]}" aria-label="Username" aria-describedby="addon-wrapping">
+    </div>
+    <hr>
+    <p class="card-text">${element["description"]}</p>
+      </p>
+    </div>
+  </div>`
+    });
+  });
+  
+</script>
+</html>

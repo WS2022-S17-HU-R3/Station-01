@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/bootstrap.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/bookings.css">
+    <title>accomodations</title>
+</head>
+
+<body class="w-100 h-100">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto d-flex justify-content-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="accomodations.html">accomodations</a>
+                </li>
+                <li class="nav-item  active">
+                    <a class="nav-link" href="bookings.html">bookings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="logout();">Logout</a>
+                </li>
+        </div>
+
+
+
+        <div class="form-inline my-2 my-lg-0">
+            <a href="#add"><button class="btn btn-outline-warning my-2 my-sm-0 mr-2">Hozzáadás</button></a>
+
+
+            <input class="form-control mr-sm-2" type="search" id="commentInput" placeholder="Comment"
+                aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit" onclick="search()">Komment
+                keresés</button>
+        </div>
+    </nav>
+
+
+
+    <div id="container" class="w-100 h-100 d-flex justify-content-between  flex-wrap">
+    </div>
+    <hr>
+    <section id="add">
+
+        <div class="card">
+            <div class="card-header text-center">
+                <h1>Új foglalás hozzáadása</h1>
+            </div>
+            <div class="card-body">
+
+                <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="addon-wrapping">Accomodation azonosító:</span>
+                    </div>
+                    <input type="text" class="form-control" aria-label="Username" id="accIdForm"
+                        aria-describedby="addon-wrapping">
+                </div>
+                <hr>
+                <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="addon-wrapping">Foglalás ideje:</span>
+                    </div>
+                    <input type="date" class="form-control" id="bookingDateForm" aria-label="Username"
+                        aria-describedby="addon-wrapping">
+                </div>
+                <hr>
+                <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="addon-wrapping">Nyaralás kezdete:</span>
+                    </div>
+                    <input type="date" class="form-control" id="checkInForm" aria-label="Username"
+                        aria-describedby="addon-wrapping">
+                </div>
+                <hr>
+                <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="addon-wrapping">Nyaralás vége:</span>
+                    </div>
+                    <input type="date" class="form-control" id="checkOutForm" aria-label="Username"
+                        aria-describedby="addon-wrapping">
+                </div>
+                <hr>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Comment:</span>
+                    </div>
+                    <textarea class="form-control" id="commentForm" aria-label="With textarea"></textarea>
+                </div>
+
+                <hr>
+                <a href="#" class="btn btn-primary w-100" onclick="addBook();">Hozzáadás</a>
+            </div>
+        </div>
+    </section>
+
+</body>
+<script src="jquery/jquery-3.6.0.min.js"></script>
+<script src="js/bootstrap.js"></script>
+<script>
+
+    function isAuth() {
+        if (localStorage.getItem('logged') != '1') {
+            location.replace("http://localhost/login.html")
+        }
+    }
+    function logout() {
+        localStorage.setItem('logged', '0');
+        isAuth();
+    }
+
+    isAuth();
+
+    function search() {
+        fetch(`http://localhost/api/bookings?comment=${commentInput.value}`).then(response => response.json())
+            .then((data) => {
+                loadData(data);
+            });
+    }
+    function fillBooks() {
+        fetch('http://localhost/api/bookings')
+            .then(response => response.json())
+            .then((data) => {
+                loadData(data);
+            });
+
+    }
+
+    function loadData(data) {
+        container.innerHTML = "";
+
+        data.forEach(element => {
+            console.log(element);
+
+            container.innerHTML += `
+                    
+                    <div class="card" style="width: 25rem;">
+            <div class="card-body">
+                <p class="card-text">
+                    <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="addon-wrapping">Accomodation azonosító:</span>
+                    </div>
+                    <input type="text" class="form-control" readonly value="${element["accomodationId"]}" aria-label="Username"
+                        aria-describedby="addon-wrapping">
+                </div>
+                <hr>
+                <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="addon-wrapping">Foglalás ideje:</span>
+                    </div>
+                    <input type="text" class="form-control" readonly value="${element["bookingDate"]}" aria-label="Username"
+                        aria-describedby="addon-wrapping">
+                </div>
+                <hr>
+                <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="addon-wrapping">Nyaralás kezdete:</span>
+                    </div>
+                    <input type="text" class="form-control" readonly value="${element["checkIn"]}" aria-label="Username"
+                        aria-describedby="addon-wrapping">
+                </div>
+                <hr>
+                <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="addon-wrapping">Nyaralás vége:</span>
+                    </div>
+                    <input type="text" class="form-control" readonly value="${element["checkOut"]}" aria-label="Username"
+                        aria-describedby="addon-wrapping">
+                </div>
+                <hr>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">Comment:</span>
+                    </div>
+                    <textarea class="form-control" readonly  aria-label="With textarea">${element["comment"]}</textarea>
+                  </div>
+                  <hr>
+                <button class="btn btn-danger w-100" onclick="deleteBook(${element["id"]})">Törlés</button>
+            </div>
+        </div>
+  `
+        });
+    }
+
+
+    fillBooks();
+
+
+
+    // Example POST method implementation:
+    async function deleteData(url = '', data = {}) {
+        // Default options are marked with *
+        const response = await fetch(url, {
+            method: 'DELETE', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: 'same-origin', // include, *same-origin, omit
+            headers: {
+                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            redirect: 'follow', // manual, *follow, error
+            referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+            body: JSON.stringify(data) // body data type must match "Content-Type" header
+        });
+        return response.json(); // parses JSON response into native JavaScript objects
+    }
+
+
+    function deleteBook(id) {
+        console.log("delete", id);
+        deleteData('http://localhost/api/bookings/' + id)
+            .then(data => {
+                console.log(data); // JSON data parsed by `data.json()` call
+                fillBooks();
+            });
+
+    }
+
+// Example POST method implementation:
+    async function addData(url = '', data = {}) {
+        // Default options are marked with *
+        const response = await fetch(url, {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: 'same-origin', // include, *same-origin, omit
+            headers: {
+            //'Content-Type': 'application/json'
+             'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            redirect: 'follow', // manual, *follow, error
+            referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+            body: JSON.stringify({accomodationId:accIdForm.value,
+            bookingDate: bookingDateForm.value,
+            checkIn: checkInForm.value,
+            checkOut: checkOutForm.value,
+            comment: commentForm.value}) // body data type must match "Content-Type" header
+        });
+        return response.json(); // parses JSON response into native JavaScript objects
+        }
+
+
+    function addBook() {
+        addData('http://localhost/api/bookings')
+            .then(data => {
+                console.log(data); // JSON data parsed by `data.json()` call
+                fillBooks();
+            });
+    }
+</script>
+
+</html>
