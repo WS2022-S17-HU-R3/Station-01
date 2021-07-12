@@ -1,12 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/bootstrap.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/main-front.css">
     <title>WS 2021 S17 HU Final</title>
 </head>
+
 <body>
-    WS 2021 S17 HU Final
+
+    <section id="formSec">
+
+        <div class="card text-center">
+            <div class="card-header">
+                <p class="float-right"><a href="#" onclick="selectLanguage('hu');">hu</a> | <a href="#"
+                        onclick="selectLanguage('en');"> eng</a></p>
+            </div>
+            <div class="card-body d-flex flex-md-row flex-sm-column">
+                <select id="accomodationsData" onchange="dateChange();checkPrice()" class="custom-select">
+                    <option selected id="firstOption">Select accomodations</option>
+                </select>
+                <div class="input-group mb-3 ">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basicaddonCheckIn">Check in</span>
+                    </div>
+                    <input type="date" id="checkIn" class="form-control" onchange="dateChange();"
+                        aria-describedby="basicaddonCheckIn">
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basicaddonCheckOut">Check out</span>
+                    </div>
+                    <input type="date" id="checkOut" class="form-control" onchange="dateChange();"
+                        aria-describedby="basicaddonCheckOut">
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basicaddonAdults">Adults</span>
+                    </div>
+                    <input type="number" id="adultCount" onchange="checkPrice()" class="form-control" min="1" value="1"
+                        aria-label="Username" aria-describedby="basicaddonAdults">
+                </div>
+            </div>
+            <div id="priceShower" class="d-flex justify-content-center">
+                <div class="input-group mb-3 w-50">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Price: </span>
+                    </div>
+                    <input type="number" readonly id="priceInput" class="form-control" aria-describedby="basic-addon1">
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Comment:</span>
+                    </div>
+                    <textarea id="comment" class="form-control" aria-label="With textarea"></textarea>
+                </div>
+                <hr>
+                <button id="reserveBut" onclick="reserveDate();" class="btn btn-outline-warning w-100">
+                    Foglalás
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+
+    <section id="accoShow">
+
+        <div class="card text-center">
+            <div class="card-header">
+                <p class="float-right"><a href="#accoShow"
+                        onclick="showAccos(!currentShowing); currentShowing ? this.innerHTML = 'show favourites' : this.innerHTML = 'show all'">show
+                        favourites</a></p>
+            </div>
+            <div id="accoHolder" class="card-body d-flex justify-content-between  flex-wrap">
+
+            </div>
+        </div>
+    </section>
+
+    <section id="calendar">
+        <div class="wrapper wrap-color">
+            <p>Vasárnap</p>
+            <p>Hétfő</p>
+            <p>Kedd</p>
+            <p>Szerda</p>
+            <p>Csütörtök</p>
+            <p>Péntek</p>
+            <p>Szombat</p>
+        </div>
+        <div id="calendarWrapper" class="wrapper">
+
+        </div>
+    </section>
+
+
+
 </body>
+
+<script src="jquery/jquery-3.6.0.min.js"></script>
+<script src="js/bootstrap.js"></script>
+
+<script>
+    let languageText;
+    let currentShowing = false;
+    let accos;
+    let hasError = false;
+
+    function selectLanguage(param) {
+        fetch(`http://localhost/lang/${param}.json`)
+            .then(response => response.json())
+            .then((data) => {
+                firstOption.innerHTML = data["select-accomodation"];
+                basicaddonCheckIn.innerHTML = data["check-in"];
+                basicaddonCheckOut.innerHTML = data["check-out"];
+                basicaddonAdults.innerHTML = data["adults"];
+                languageText = data;
+            });
+    }
+
+    function dateChange() {
+        let inDate = checkIn.value;
+        let outDate = checkOut.value;
+        if (inDate != "" && outDate != "" && accomodationsData.value != languageText["select-accomodation"]) {
+            inDate = new Date(checkIn.value);
+            outDate = new Date(checkOut.value);
+            if (inDate < outDate) {
+                checkPrice();
+                accoShow.style.display = "none";
+                calendar.style.display = "block";
+                calendarWrapper.innerHTML = "";
+                inDate.setDate(inDate.getDate() - 10);
+                outDate.setDate(outDate.getDate() + 10);
+
+                while (inDate.toDateString().split(" ")[0] != "Sun") {
+                    inDate.setDate(inDate.getDate() - 1);
+                }
+                do {
+                    calendarWrapper.innerHTML += `<div class="element" data="${inDate.valueOf()}">${inDate.getDate()}</div>`;
+                    inDate.setDate(inDate.getDate() + 1);
+                } while (inDate.toDateString() != outDate.toDateString());
+                calendarWrapper.innerHTML += `<div class="element"  data="${inDate.valueOf()}">${inDate.getDate()}</div>`;
+                inDate.setDate(inDate.getDate() + 1);
+                getReservedDates();
+            }
+        }
+
+    }
+
+    function checkPrice() {
+        let inDate = checkIn.value;
+        let outDate = checkOut.value;
+        if (inDate != "" && outDate != "" && Number(adultCount.value) > 0 && accomodationsData.value != languageText["select-accomodation"]) {
+            inDate = new Date(checkIn.value);
+            outDate = new Date(checkOut.value);
+            nights = 0;
+            while (inDate.toDateString() != outDate.toDateString()) {
+                nights++;
+                inDate.setDate(inDate.getDate() + 1);
+            }
+            price = accos[accomodationsData.value - 1]["price"];
+            priceShower.style.display = "block";
+            console.log(nights, price, adultCount.value);
+            priceInput.value = nights * price * Number(adultCount.value);
+        }
+    }
+
+    function addFav(id) {
+        let favs = getFavs();
+        if (!favs.includes(id)) {
+            favs.push(id);
+            alert("Sikeres hozzáadás");
+        } else {
+            favs.pop(id);
+            alert("Sikeres törlés");
+            showAccos(true);
+        }
+        localStorage.setItem("favs", JSON.stringify(favs));
+
+    }
+    function getFavs() {
+        let favs = JSON.parse(localStorage.getItem("favs"));
+        if (favs == null || favs == "null") {
+            favs = [];
+        }
+        return favs;
+    }
+
+    function getReservedDates() {
+        fetch(`http://localhost:8001/accomodations/${accomodationsData.value}/bookings`)
+            .then(response => response.json())
+            .then((data) => {
+                let possibleDivs = getByAttribute();
+                data.forEach(element => {
+                    let startDate = new Date(element["checkIn"])
+                    let endDate = new Date(element["checkOut"])
+                    while (startDate.valueOf() != endDate.valueOf() + 86400000) {
+                        for (let i = 0; i < possibleDivs.length; i++) {
+                            const element = possibleDivs[i];
+                            if (element.getAttribute("data") == startDate.valueOf()) {
+                                element.classList.add("error");
+                            }
+                        }
+                        startDate.setDate(startDate.getDate() + 1);
+                    }
+                });
+                paintSelected();
+            });
+    }
+    function paintSelected() {
+        let inDate = new Date(checkIn.value);
+        let outDate = new Date(checkOut.value);
+        let possibleDivs = getByAttribute();
+        hasError = false;
+
+        while (inDate.valueOf() != outDate.valueOf() + 86400000) {
+            for (let i = 0; i < possibleDivs.length; i++) {
+                const element = possibleDivs[i];
+                if (element.getAttribute("data") == inDate.valueOf()) {
+
+                    if (element.classList.contains("error")) {
+                        element.classList.add("reserved");
+                        element.classList.remove("error");
+                        hasError = true;
+                    } else {
+                        element.classList.add("available");
+                    }
+                }
+            }
+            inDate.setDate(inDate.getDate() + 1);
+        }
+
+        if (!hasError) {
+            reserveBut.style.display = "block";
+        } else {
+            reserveBut.style.display = "none";
+        }
+    }
+
+    function getByAttribute() {
+        let divs = document.getElementsByTagName("div");
+        let good = [];
+        for (let i = 0; i < divs.length; i++) {
+            const element = divs[i];
+            if (element.getAttribute("data") != null) {
+                good.push(element);
+            }
+        }
+        return good;
+    }
+
+
+
+    async function sendData(url = '', data = {}) {
+        // Default options are marked with *
+        const response = await fetch(url, {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: 'same-origin', // include, *same-origin, omit
+            headers: {
+                'Content-Type': 'application/json'
+                //'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            redirect: 'follow', // manual, *follow, error
+            referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+            body: JSON.stringify(data) // body data type must match "Content-Type" header
+        });
+        return response.json(); // parses JSON response into native JavaScript objects
+    }
+
+
+    function reserveDate() {
+        let now = new Date();
+        let bookingDate = `${now.getFullYear()}-${now.getMonth().length == 1 ? now.getMonth() : "0" + now.getMonth()}-${now.getDate()}`;
+        try {
+            sendData('http://localhost:8001/bookings', {
+                accomodationId: accomodationsData.value,
+                bookingDate: bookingDate,
+                checkIn: checkIn.value,
+                checkOut: checkOut.value,
+                comment: comment.value
+            })
+                .then(data => {
+                    alert("Sikeres foglalás!");
+                }).then(() => {
+                    dateChange();
+                });
+        } catch (error) {
+            alert("Sikertelen foglalás");
+        }
+
+    }
+
+    function showAccos(withFav) {
+        fetch('http://localhost:8001/accomodations')
+            .then(response => response.json())
+            .then((data) => {
+                accos = data;
+                accoHolder.innerHTML = "";
+                accomodationsData.innerHTML = `<option selected id="firstOption">${languageText["select-accomodation"]}</option>`;
+                currentShowing = withFav;
+                data.forEach(element => {
+                    accomodationsData.innerHTML += `<option value="${element["id"]}">${element["name"]}</option>`
+
+                    if (withFav && getFavs().includes(element["id"]) || !withFav) {
+                        accoHolder.innerHTML += `
+                <div class="card" style="width: 25rem;">
+                    <div class="card-header">
+                        <p class="float-right"><a href="#"><img src="img/star.PNG" onclick="addFav(${element["id"]})" alt="star"></a></p>
+                    </div>
+                    <img src="img/${element["img"]}" class="card-img-top img-thumbnail" alt="Kep">
+                    <div class="card-body">
+                        <h3 class="card-title text-center">${element["name"]}</h3>
+                        <p class="card-text">
+                        <div class="input-group flex-nowrap">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="addon-wrapping">price</span>
+                            </div>
+                            <input type="text" class="form-control" readonly value="${element["price"]} /adult/night"
+                                aria-label="Username" aria-describedby="addon-wrapping">
+                        </div>
+                        <hr>
+                        <p class="card-text">${element["description"]}</p>
+                        </p>
+                    </div>
+                </div>
+                `
+                    }
+
+                });
+            });
+    }
+
+    function main() {
+        selectLanguage('en');
+        showAccos(currentShowing);
+    }
+
+
+
+    main();
+</script>
+
 </html>

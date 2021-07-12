@@ -5,7 +5,7 @@ $params = ["bookings","",""];
 $params = explode("/",substr($_SERVER["REQUEST_URI"],5));
 #print_r($params);
 #print_r($_GET);
-var_dump($_POST);
+#var_dump($_POST);
 
 if($_SERVER['REQUEST_METHOD'] == "GET")
 {

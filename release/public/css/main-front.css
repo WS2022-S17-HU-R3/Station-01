@@ -1,0 +1,41 @@
+#formSec,
+#accoShow {
+  padding: 50px;
+}
+
+input,
+select {
+  margin-right: 10px;
+}
+
+#calendar {
+  display: none;
+  margin: 0px 20px 100px 20px;
+}
+.wrapper {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  grid-auto-rows: minmax(100px, auto);
+}
+.wrap-color {
+  background-color: var(--shan-gray);
+  color: var(--shan-white);
+}
+
+.element {
+    background-color: rgb(109, 21, 224);
+  }
+  
+.reserved{
+    background-color: rgb(255, 115, 0);
+}
+.error{
+    background-color: darkred;
+}
+.available{
+    background-color: var(--shan-green-dark);
+}
+#reserveBut{
+    display: none;
+}
