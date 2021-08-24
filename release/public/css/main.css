@@ -1,0 +1,29 @@
+:root {
+    --shan-green: #5dd782;
+    --shan-green-dark: #49b56a;
+    --shan-green-light: #67ee90;
+    --shan-gray: #333333;
+    --shan-gray-light: #eeeeee;
+    --shan-white: #ffffff;
+}
+@font-face {
+    font-family: "arial-narrow";
+    src: url("/fonts/Arial\ Narrow.ttf");
+}
+body{
+    font-family: "arial-narrow";
+}
+
+body{
+    background-color: var(--shan-gray-light);
+}
+li {
+    background-color: var(--shan-green);
+    
+}
+li > a{
+    color: var(--shan-white) !important;
+}
+.active{
+    background-color: var(--shan-green-dark) !important;
+}

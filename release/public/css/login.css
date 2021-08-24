@@ -1,0 +1,15 @@
+#cont{
+    height: 100vh;
+}
+h1,p,span,button{
+    font-family: 'Times New Roman', Times, serif;
+}
+.card-header{
+    color: var(--shan-gray);
+}
+.card-title{
+    color: var(--shan-green-light);
+}
+.card-footer{
+    color: var(--shan-green-dark) !important;
+}
